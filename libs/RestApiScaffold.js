@@ -208,9 +208,40 @@ Api.prototype = {
 		server.listen(port);
 	},
 
-	addResource: function(resourceCfg) {
+	addResource: function(resourceCfg, config) {
+		if (config && config.applyBoilerPlate) {
+			this.applyBoilerPlate(resourceCfg);
+		}
+
 		this.resources[resourceCfg.url] = resourceCfg;
 		this.resourceNames[this.resourceNames.length] = resourceCfg.url;
+	},
+
+	applyBoilerPlate: function(other) {
+		var functions = {
+			onList: function() {
+				return this.model.list();
+			},
+
+			onGet: function(id) {
+				return this.model.get(id);
+			},
+
+			onPost: function(data) {
+				return this.model.create(data);
+			},
+
+			onPut: function(id, data) {
+				return this.model.update(id, data);
+			}
+		};
+
+		for(var fn in functions) {
+			if (!other[fn]) {
+				other[fn] = functions[fn];
+			}
+		}
+	
 	}
 };
 
