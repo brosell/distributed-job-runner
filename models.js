@@ -1,4 +1,4 @@
-var Model = require("./Model.js");
+var Model = require("./libs/Model.js");
 
 module.exports = {
 	sessions: new Model({

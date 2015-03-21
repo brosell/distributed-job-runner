@@ -1,4 +1,4 @@
-var Api = require("./RestApiScaffold.js");
+var Api = require("./libs/RestApiScaffold.js");
 
 var api = new Api();
 var models = require("./models.js");
