@@ -3,94 +3,70 @@ var Model = require("./Model.js");
 
 var api = new Api();
 
-appleModel = new Model({
-	name: 'apple',
-	fields: ["name", "description"]
-}),
-
-api.addResource( {	name: 'apple',
-	url: 'apples',
-
-	onBeforeRoute: function(data) {
-		console.log('onBeforeRoute: ' + data.resource);
-		// data.request.method='POST';
-	},
-
-	onList: function() {
-		console.log('onList');
-		return appleModel.list();
-	},
-	onGet: function(id) {
-		console.log('onGet');
-		return appleModel.get(id);
-	},
-	onPost: function(data) {
-		console.log('onPost');
-		return appleModel.create(data);
-	},
-	onPut: function(id, data) {
-		console.log('onPut');
-		return appleModel.update(id, data);
-	}
+var sessionModel = new Model({
+	name: 'sessions',
+	fields: ['startTimestamp', 'endTimestamp', 'result'],
 });
+
+var jobModel = new Model({
+	name: 'jobs',
+	fields: ['who', 'what', 'startTimestamp', 'endTimestamp', 'result']
+});
+
+// result { status: 200, response="?" }
 
 // CI -> Mediator
 api.addResource( {	name: 'regression-session',
 	url: 'regression-sessions',
 
-	onBeforeRoute: function(data) {
-		console.log('onBeforeRoute: ' + data.resource);
-		// data.request.method='POST';
-	},
-
 	// list current and past sessions
 	onList: function() {
-		console.log('onList');
-		return { list: 'yep' };
+		return sessionModel.list();
 	},
 
 	// data on a specific session (current or past)
 	onGet: function(id) {
-		console.log('onGet');
+		return sessionModel.getItem(id);
 	},
-
-	// create a session - fails if session is already active
-	onPost: function(data) {
-		console.log('onPost');
-		return data;
-	},
-
-	// modify a session
-	onPut: function(id, data) {
-		console.log('onPut');
-		return { id: id, data: data };
-	},
-
-	// cancel a session. Only current session can be canceled
-	onDelete: function(id) {
-		console.log('onDelete');
-		return { id: id };
-	}
 });
 
 api.addResource( {	name: 'current-regression-session',
 	url: 'current-regression-session',
 
-	onBeforeRoute: function(data) {
-		console.log('onBeforeRoute: ' + data.resource);
-		// data.request.method='POST';
-	},
-
 	// view the one and only current session
 	onList: function() {
-		console.log('onList');
-		return { list: 'yep' };
+		var currentSession = sessionModel.queryItem(function(item) {
+			return !item.endTimestamp;
+		});
+
+		return currentSession;
+	},
+
+	// create a session - fails if session is already active
+	onPost: function(data, request, result) {
+		var currentSession = sessionModel.queryItem(function(item) {
+			return !item.endTimestamp;
+		});
+
+		if (currentSession){
+			result.status = 422;
+			result.response = { error: 'session already running', currentSession: currentSession };
+			return;
+		}
+
+		result.status = 201;
+		return sessionModel.create({startTimestamp: new Date().toString()}, true);
 	},
 
 	// cancel a session. Only current session can be canceled
 	onDelete: function(id) {
-		console.log('onDelete');
-		return false;
+		var currentSession = sessionModel.queryItem(function(item) {
+			return !item.endTimestamp;
+		});
+		if (currentSession) {
+			currentSession.endTimestamp = new Date().toString();
+			return sessionModel.update(currentSession.id, currentSession);
+		}
 	}
 });
 
@@ -154,6 +130,42 @@ api.addResource( {	name: 'test',
 	},
 	onDelete: function(id, request) {
 		return {method: 'delete', id: id };
+	}
+});
+
+api.addResource( {	name: 'meta',
+	url: 'meta',
+
+	onBeforeRoute: function(data) {
+		console.log('onBeforeRoute: ' + data.resource);
+		// data.request.method='POST';
+	},
+
+	functions: {
+		reloadModels: function(){
+			sessionModel.load();
+			jobModel.load();
+			return { 'result': 'reloaded' };
+		},
+		clearSessions: function(request) {
+			sessionModel.clear();
+			return "cleared";
+		},
+		resources: function(request) {
+			return api.resourceNames;
+		}
+	},
+
+	onList: function(request) {
+		var result = [];
+		for(var a in this.functions) {
+			result[result.length] = a;
+		}
+
+		return result;
+	},
+	onGet: function(id, request) {
+		return this.functions[id](request);
 	}
 });
 
