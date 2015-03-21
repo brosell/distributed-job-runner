@@ -183,6 +183,8 @@ Api.prototype = {
 			status: 200
 		};
 
+		pipeline.data.request._api = this;
+
 		pipeline.enqueue(this.filter.bind(this));
 		pipeline.enqueue(this.processRequestBody.bind(this));
 		pipeline.enqueue(this.processUrl.bind(this));

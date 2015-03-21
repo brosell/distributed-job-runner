@@ -4,7 +4,7 @@ function Model(cfg) {
 	// name and fields
 	this.resourceCfg = cfg;
 	this.modelName = cfg.name;
-	this.filename = this.modelName + "_data.json";
+	this.filename = "data_" + this.modelName + ".json";
 
 	this.data = [];
 	this.load();
@@ -33,7 +33,7 @@ Model.prototype = {
 		else {
 			this.data.push(obj);
 		}
-		
+
 		this.save();
 		return this.clone(obj);
 	},
@@ -49,7 +49,6 @@ Model.prototype = {
 	},
 
     queryItem: function(filter) {
-		console.log('queryItenm: ' + this.data);
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
 			if (filter(this.data[i])) {
@@ -59,7 +58,6 @@ Model.prototype = {
 	},
 
 	getItem: function(id) {
-		console.log('getItem: ' + this.data);
 		var r = this.queryItem(function(item){
 			return item.id == id;
 		});
@@ -125,7 +123,6 @@ Model.prototype = {
 		for (var i in this.resourceCfg.fields) {
 			var fieldName = this.resourceCfg.fields[i];
 			if (from[fieldName]) {
-				console.log('cloning: ' + fieldName);
 				ret[fieldName] = from[fieldName] || "";
 			}
 		}
@@ -137,7 +134,6 @@ Model.prototype = {
 		for (var i in this.resourceCfg.fields) {
 			var fieldName = this.resourceCfg.fields[i];
 			if (from[fieldName] || !to) {
-				console.log('cloning: ' + fieldName);
 				ret[fieldName] = from[fieldName] || "";
 			}
 		}
