@@ -8,13 +8,10 @@ function Model(cfg) {
 
 	this.data = [];
 	this.load();
-
-	console.log('loaded: ' + this.data);
 }
 
 Model.prototype = {
 	list: function(filterExpression) {
-		console.log('list:' + this.modelName);
 		return this.clone(this.data);
 	},
 
@@ -22,8 +19,7 @@ Model.prototype = {
 		return this.data.length;
 	},
 
-	create: function(sourceObj) {
-		console.log('create');
+	create: function(sourceObj, pushToFront) {
 		var obj = this.modelClone(sourceObj);
 
 		if (!obj.id) {
@@ -31,16 +27,20 @@ Model.prototype = {
 			obj.model = this.modelName;
 		}
 
-		this.data.push(obj);
+		if (pushToFront) {
+			this.data.unshift(obj);
+		}
+		else {
+			this.data.push(obj);
+		}
+		
 		this.save();
 		return this.clone(obj);
 	},
 
 	queryItems: function(filter) {
-		console.log('queryItenm: ' + this.data);
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
-			console.log('-=-' + this.data[i].id);
 			if (filter(this.data[i])) {
 				returnList[returnList.length] = this.data[i];
 			}
@@ -52,7 +52,6 @@ Model.prototype = {
 		console.log('queryItenm: ' + this.data);
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
-			console.log('-=-' + this.data[i].id);
 			if (filter(this.data[i])) {
 				return this.data[i];
 			}
@@ -88,7 +87,7 @@ Model.prototype = {
 	},
 
 	load: function() {
-		
+		console.log('loading: ' + this.filename);
 		try {
 			var dataContents = fs.readFileSync(this.filename, {
 				encoding: 'UTF8'
@@ -103,8 +102,8 @@ Model.prototype = {
 	},
 
 	save: function() {
-		var json = JSON.stringify(this.data);
-		console.log('save: ' + json);
+		var json = JSON.stringify(this.data, null, 2);
+		//console.log('save: ' + json);
 		fs.writeFileSync(this.filename, json);
 	},
 
@@ -148,6 +147,10 @@ Model.prototype = {
 		return ret;
 	},
 
+	clear: function() {
+		this.data = [];
+		this.save();
+	}
 };
 
 module.exports = Model;

@@ -7,6 +7,7 @@ var http = require("http");
 
 function Api() {
 	this.resources = {};
+	this.resourceNames = [];
 }
 
 Api.prototype = {
@@ -44,7 +45,9 @@ Api.prototype = {
 		});
 		request.on('end', function() {
 			try {
-				pipeline.data.postData = JSON.parse(body);
+				if (body != ''){
+					pipeline.data.postData = JSON.parse(body);
+				}
 				pipeline.next();
 			} catch (ex) {
 				response.writeHead(500);
@@ -106,7 +109,8 @@ Api.prototype = {
 	routeRequest: function(pipeline) {
 
 		var request = pipeline.data.request;
-		
+		var result = pipeline.result;
+
 		var modelResource = this.resources[pipeline.data.resource];
 		if (!modelResource) {
 			pipeline.result.status = 404;
@@ -122,34 +126,50 @@ Api.prototype = {
 		var method = request.method;
 
 		var restResult;
+
+		pipeline.result.status = 404;
+		pipeline.result.response = "Not Found";
+		
+
 		if (method == 'GET' && !pipeline.data.id && modelResource.onList) {
 			// list
-			restResult = modelResource.onList(request);
+			restResult = modelResource.onList(request, result);
+			if (restResult) {
+				pipeline.result.status = 200;
+			}
 		} else if (method == 'GET' && modelResource.onGet) {
 			// get
-			restResult = modelResource.onGet(pipeline.data.id, request);
+			restResult = modelResource.onGet(pipeline.data.id, request, result);
+			if (restResult) {
+				pipeline.result.status = 200;
+			}
 		} else if (method == 'POST' && modelResource.onPost && !pipeline.data.id) {
 			// create
-			restResult = modelResource.onPost(pipeline.data.postData, request);
+			restResult = modelResource.onPost(pipeline.data.postData, request, result);
 			if (restResult) {
 				pipeline.result.status = 201;
 			}
 		} else if (method == 'PUT' && modelResource.onPut) {
-			restResult = modelResource.onPut(pipeline.data.id, pipeline.data.postData, request);
+			restResult = modelResource.onPut(pipeline.data.id, pipeline.data.postData, request, result);
+			if (restResult) {
+				pipeline.result.status = 200;
+			}
 		} else if (method == 'DELETE' && modelResource.onDelete) {
-			restResult = modelResource.onDelete(pipeline.data.id, request);
+			restResult = modelResource.onDelete(pipeline.data.id, request, result);
 			if (restResult) {
 				pipeline.result.status = 200;
 			}
 		}
 
-		if (!restResult) {
-			pipeline.result.status = 404;
-			pipeline.result.response = "Not Found";
+		if (restResult === false) {
 			pipeline.clear();
 			return;
 		}
-		pipeline.result.response = restResult;
+
+		if (typeof(restResult) != 'undefined'){
+			pipeline.result.response = restResult;
+		}
+		
 	},
 
 	onRequest: function(request, response) {
@@ -188,6 +208,7 @@ Api.prototype = {
 
 	addResource: function(resourceCfg) {
 		this.resources[resourceCfg.url] = resourceCfg;
+		this.resourceNames[this.resourceNames.length] = resourceCfg.url;
 	}
 };
 
