@@ -52,8 +52,14 @@ module.exports = {
 		},
 
 		// cancel a session. Only current session can be canceled
-		onDelete: function(id) {
+		onDelete: function(id, request, result) {
 			// TODO: if open or unassigned jobs then require confirmation
+			if(!request.queryString['confirm']){
+				result.status = 422;
+				result.response = "confirmation required";
+				return;
+			}
+
 			var currentSession = this.model.queryItem(function(item) {
 				return !item.endTimestamp;
 			});
