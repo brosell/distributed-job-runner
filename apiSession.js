@@ -1,4 +1,5 @@
 var log = require("./libs/log.js");
+var shell = require('./libs/shell.js');
 
 // CI agent -> mediator
 module.exports = {
@@ -43,12 +44,20 @@ module.exports = {
 			}
 
 			// TODO: scrape the feature dlls and create jobs for each matching test
+			
 
 			result.status = 201;
-			var me = this;
-			setTimeout(this.autoEndSession.bind(this), 30000);
+			currentSession = this.model.create({startTimestamp: new Date().toString()}, true);
 
-			return this.model.create({startTimestamp: new Date().toString()}, true);
+			// var me = this;
+			// var id = currentSession.id;
+			// shell.run('netstat', ['-a'], function(stdout) {
+			// 	var cs = me.model.get(id);
+			// 	cs.result = stdout;
+			// 	me.model.update(id, cs);
+			// }.bind(me));
+
+			return currentSession;
 		},
 
 		// cancel a session. Only current session can be canceled
