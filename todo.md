@@ -5,7 +5,7 @@ General
 - reloadModel is broken
 
 RestAPI thingie
-- support parent/id/child/(id) resources
+X support parent/id/child/(id) resources
 - facets
 - log details about the request
 
