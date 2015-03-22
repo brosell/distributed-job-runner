@@ -1,4 +1,5 @@
 var fs = require('fs');
+var log = require("./log.js");
 
 function Model(cfg) {
 	// name and fields
@@ -66,7 +67,7 @@ Model.prototype = {
 	},
 
 	get: function(id) {
-		console.log('get: ' + id);
+		log.debug('get: ' + id);
 
 		var item = this.getItem(id);
 		var ret;
@@ -77,7 +78,7 @@ Model.prototype = {
 	},
 
 	update: function(id, data) {
-		console.log('update');
+		log.debug('update');
 		var toUpdate = this.getItem(id);
 		toUpdate = this.updateFrom(data, toUpdate);
 		this.save();
@@ -85,7 +86,7 @@ Model.prototype = {
 	},
 
 	load: function() {
-		console.log('loading: ' + this.filename);
+		log.debug('loading: ' + this.filename);
 		try {
 			var dataContents = fs.readFileSync(this.filename, {
 				encoding: 'UTF8'
@@ -101,7 +102,7 @@ Model.prototype = {
 
 	save: function() {
 		var json = JSON.stringify(this.data, null, 2);
-		//console.log('save: ' + json);
+		//log.debug('save: ' + json);
 		fs.writeFileSync(this.filename, json);
 	},
 

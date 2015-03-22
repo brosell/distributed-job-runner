@@ -1,4 +1,7 @@
 var Api = require("./libs/RestApiScaffold.js");
+var log = require("./libs/log.js");
+
+log.logDebug = true;
 
 var api = new Api();
 var models = require("./models.js");
@@ -9,4 +12,4 @@ var jobsApis = require("./apiJob.js").init(api, models);
 
 api.start(8888);
 
-console.log('started.');
+log.log('started.');

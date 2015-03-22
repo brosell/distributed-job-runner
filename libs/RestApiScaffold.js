@@ -1,5 +1,6 @@
 var Pipeline = require('./pipeliner.js');
 var http = require("http");
+var log = require("./log.js");
 
 /*
 	request = { method, queryString, url, statusCode, headers}
@@ -14,7 +15,7 @@ Api.prototype = {
 
 	filter: function(pipeline) {
 		// filter out unwanted request
-		console.log('filter');
+		log.debug('filter');
 		if (pipeline.data.request.url == '/favicon.ico') {
 			// 404;
 			pipeline.result.status = 404;
@@ -25,13 +26,13 @@ Api.prototype = {
 
 	processRequestBody: function(pipeline) {
 		// for POST and PUT read the body stream
-		console.log('processRequestBody');
+		log.debug('processRequestBody');
 
 		var request = pipeline.data.request;
 		var response = pipeline.data.response;
 
 		if (request.method != 'POST' && request.method != 'PUT') {
-			console.log('no body expected... skipping.');
+			log.debug('no body expected... skipping.');
 			return;
 		}
 
@@ -45,7 +46,7 @@ Api.prototype = {
 		});
 		request.on('end', function() {
 			try {
-				if (body != ''){
+				if (body !== '') {
 					pipeline.data.postData = JSON.parse(body);
 				}
 				pipeline.next();
@@ -61,7 +62,7 @@ Api.prototype = {
 
 	writeResponse: function(pipeline) {
 		// json response, status, response.end, etc
-		console.log('writeResponse');
+		log.debug('writeResponse');
 		pipeline.data.response.writeHead(pipeline.result.status);
 		pipeline.data.response.write(JSON.stringify(pipeline.result.response, null, 2));
 		pipeline.data.response.end();
@@ -71,12 +72,10 @@ Api.prototype = {
 
 	},
 
-	processUrl: function(pipeline) {
+	processQueryString: function(pipeline) {
 		var request = pipeline.data.request;
 		var url = request.url;
 
-		console.log('url: ' + url);
-		
 		var urlParts = url.split('?');
 
 		request.queryString = {};
@@ -99,11 +98,37 @@ Api.prototype = {
 				}
 			}
 		}
+	},
+
+	processUrl: function(pipeline) {
+		/*
+			resource/(id)
+			parent/id/child/(id) - order/12/items, order/12/items/42
+		*/
+
+		var request = pipeline.data.request;
+		var url = request.url;
+
+		log.debug('url: ' + url);
+		
+		var urlParts = url.split('?');
 
 		var pathSegments = urlParts[0].split('/');
 
-		pipeline.data.resource = pathSegments[1];
-		pipeline.data.id = pathSegments[2];
+		if (pathSegments.length <= 3) {
+			pipeline.data.resource = pathSegments[1];
+			pipeline.data.id = pathSegments[2];
+		} else {
+			pipeline.data.parentResource = pathSegments[1];
+			pipeline.data.parentId = pathSegments[2];
+			pipeline.data.resource = pathSegments[3];
+			pipeline.data.id = pathSegments[4];
+		}
+
+		log.debug('parent: ' + pipeline.data.parentResource);
+		log.debug('parentId: ' + pipeline.data.parentId);
+		log.debug('resource: ' + pipeline.data.resource);
+		log.debug('id: ' + pipeline.data.id);
 	},
 
 	routeRequest: function(pipeline) {
@@ -112,11 +137,25 @@ Api.prototype = {
 		var result = pipeline.result;
 
 		var modelResource = this.resources[pipeline.data.resource];
+			
+
 		if (!modelResource) {
 			pipeline.result.status = 404;
 			pipeline.result.response = "Resource Type Not Found";
 			pipeline.clear();
 			return;
+		}
+
+		if (pipeline.data.parentResource) {
+			if (modelResource.parent != pipeline.data.parentResource) {
+				pipeline.result.status = 404;
+				pipeline.result.response = "Parent or Resource Type Not Found";
+				pipeline.clear();
+				return;
+			}
+
+			request.parentResource = pipeline.data.parentResource;
+			request.parentId = pipeline.data.parentId;
 		}
 
 		if (modelResource.onBeforeRoute) {
@@ -187,6 +226,7 @@ Api.prototype = {
 
 		pipeline.enqueue(this.filter.bind(this));
 		pipeline.enqueue(this.processRequestBody.bind(this));
+		pipeline.enqueue(this.processQueryString.bind(this));
 		pipeline.enqueue(this.processUrl.bind(this));
 		pipeline.enqueue(this.routeRequest.bind(this));
 
@@ -195,13 +235,13 @@ Api.prototype = {
 			pipeline.enqueue(me.writeResponse.bind(me));
 
 			pipeline.go(function(err, pipeline) {
-				console.log("finished ");
+				log.debug("finished ");
 			});
 		});
 	},
 
 	start: function(port) {
-		console.log("listening on port " + port + "...");
+		log.debug("listening on port " + port + "...");
 		var me = this;
 		var http = require("http");
 		var server = http.createServer(me.onRequest.bind(me));

@@ -1,8 +1,10 @@
+var log = require("./libs/log.js");
+
 // CI agent -> mediator
 module.exports = {
 	sessions: {
-		name: 'regression-session',
-		url: 'regression-sessions',
+		name: 'session',
+		url: 'sessions',
 
 		// list current and past sessions
 		onList: function() {
@@ -16,8 +18,8 @@ module.exports = {
 	},
 
 	currentSession: {
-		name: 'current-regression-session',
-		url: 'current-regression-session',
+		name: 'current-session',
+		url: 'current-session',
 
 		// view the one and only current session
 		onList: function() {
@@ -62,7 +64,7 @@ module.exports = {
 		},
 
 		autoEndSession: function() {
-			console.log('autoend');
+			log.debug('autoend');
 			this.onDelete();
 		}
 	},

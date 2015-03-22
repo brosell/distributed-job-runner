@@ -1,4 +1,4 @@
-
+var log = require("./log.js");
 
 function Pipeline() {
 	this.fns = [];

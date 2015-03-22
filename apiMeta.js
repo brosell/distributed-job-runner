@@ -1,3 +1,4 @@
+var log = require("./libs/log.js");
 
 module.exports = {
 	metaApi: {
@@ -5,7 +6,7 @@ module.exports = {
 		url: 'meta',
 
 		onBeforeRoute: function(data) {
-			console.log('onBeforeRoute: ' + data.resource);
+			log.debug('onBeforeRoute: ' + data.resource);
 			// data.request.method='POST';
 		},
 
@@ -48,7 +49,7 @@ module.exports = {
 		url: 'test',
 
 		onBeforeRoute: function(data) {
-			console.log('onBeforeRoute: ' + data.resource);
+			log.debug('onBeforeRoute: ' + data.resource);
 			// data.request.method='POST';
 		},
 

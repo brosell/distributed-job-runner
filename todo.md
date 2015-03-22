@@ -2,10 +2,13 @@ Todo
 
 General
 - pacakge restapi/model/pipeliner
+- reloadModel is broken
 
 RestAPI thingie
 - support parent/id/child/(id) resources
 - facets
+- log details about the request
+
 
 Model
 - archive function
