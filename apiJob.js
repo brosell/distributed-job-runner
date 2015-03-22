@@ -9,13 +9,22 @@ module.exports = {
 
 		onList: function(request) {
 			if (request.parentId) {
-				log.debug('job parent');
+				log.debug('list jobs of parent');
 				return this.model.queryItems(function(item) {
 					return item.sessionId == request.parentId;
 				});
 			}
 
 			return this.model.list();
+		},
+
+		onGet: function(id, request) {
+			if (request.parentId) {
+				log.debug('get job via parent');
+			}
+			return this.model.queryItem(function(item) {
+				return item.sessionId == request.parentId && item.id == id;
+			});
 		}
 
 	},
