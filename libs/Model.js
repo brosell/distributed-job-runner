@@ -54,14 +54,15 @@ Model.prototype = {
 				returnList[returnList.length] = this.data[i];
 			}
 		}
-		return returnList;
+		var me = this;
+		return returnList.map( function(item) { return me.modelClone(this); } );
 	},
 
     queryItem: function(filter) {
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
 			if (filter(this.data[i])) {
-				return this.data[i];
+				return this.modelClone(this.data[i]);
 			}
 		}
 	},
@@ -71,7 +72,7 @@ Model.prototype = {
 			return item.id == id;
 		});
 
-		return r;
+		return this.modelClone(r);
 	},
 
 	get: function(id) {
