@@ -21,9 +21,17 @@ Model.prototype = {
 	},
 
 	create: function(sourceObj, pushToFront) {
-		var obj = this.modelClone(sourceObj);
+		var obj = {
+			id: 'x'
+		};
+		for (var i in this.resourceCfg.fields) {
+			var fieldName = this.resourceCfg.fields[i];
+			obj[fieldName] = '';
+		}
 
-		if (!obj.id) {
+		obj = this.updateFrom(sourceObj, obj);
+
+		if (obj.id == 'x') {
 			obj.id = this.guid();
 			obj.model = this.modelName;
 		}
