@@ -1,5 +1,7 @@
 var log = require("./libs/log.js");
-var shell = require('./libs/shell.js');
+var SessionConfigurator = require("./sessionConfigurator.js");
+var models = require('./models.js');
+
 
 // CI agent -> mediator
 module.exports = {
@@ -23,10 +25,16 @@ module.exports = {
 		url: 'current-session',
 
 		// view the one and only current session
-		onList: function() {
+		onList: function(request) {
 			var currentSession = this.model.queryItem(function(item) {
 				return !item.endTimestamp;
 			});
+
+			if (request.queryString['deep']) {
+				currentSession.jobs = models.jobs.queryItems(function(job) {
+					return job.sessionId == currentSession.id;
+				});
+			}
 
 			return currentSession;
 		},
@@ -37,25 +45,19 @@ module.exports = {
 				return !item.endTimestamp;
 			});
 
-			if (currentSession){
+			if (currentSession && !request.queryString['force']){
 				result.status = 422;
 				result.response = { error: 'session already running', currentSession: currentSession };
 				return;
 			}
 
-			// TODO: scrape the feature dlls and create jobs for each matching test
-			
+			// TODO: kickoff the sessionConfigurator
 
 			result.status = 201;
 			currentSession = this.model.create({startTimestamp: new Date().toString()}, true);
 
-			// var me = this;
-			// var id = currentSession.id;
-			// shell.run('netstat', ['-a'], function(stdout) {
-			// 	var cs = me.model.get(id);
-			// 	cs.result = stdout;
-			// 	me.model.update(id, cs);
-			// }.bind(me));
+			var sessionConfigurator = new SessionConfigurator(currentSession);
+			sessionConfigurator.configure();
 
 			return currentSession;
 		},
