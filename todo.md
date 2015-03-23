@@ -2,7 +2,13 @@ Todo
 
 General
 - pacakge restapi/model/pipeliner
-- reloadModel is broken
+- meta/reloadModel is broken
+
+Model
+- make id first property
+
+Library functionality
+X async foreach - got library
 
 RestAPI thingie
 X support parent/id/child/(id) resources
