@@ -30,7 +30,7 @@ module.exports = {
 				return !item.endTimestamp;
 			});
 
-			if (request.queryString['deep']) {
+			if (currentSession && request.queryString['deep']) {
 				currentSession.jobs = models.jobs.queryItems(function(job) {
 					return job.sessionId == currentSession.id;
 				});
