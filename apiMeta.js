@@ -1,4 +1,5 @@
 var log = require("./libs/log.js");
+var models = require('./models.js');
 
 module.exports = {
 	metaApi: {
@@ -12,8 +13,8 @@ module.exports = {
 
 		functions: {
 			reloadModels: function(){
-				sessionModel.load();
-				jobModel.load();
+				models.sessions.load();
+				models.jobs.load();
 				return { 'result': 'reloaded' };
 			},
 			clearSessions: function(request) {
@@ -24,7 +25,7 @@ module.exports = {
 				return request._api.resourceNames;
 			},
 			quit: function(request) {
-				setTimeout(function() {process.exit();}, 1000);
+				setTimeout(function() {process.exit();}, 3000);
 				return "quiting in a sec";
 			}
 		},
