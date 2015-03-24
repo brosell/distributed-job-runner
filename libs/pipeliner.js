@@ -3,53 +3,55 @@ var log = require("./log.js");
 function Pipeline() {
 	this.fns = [];
 	this.callback = null;
-	this.errorOccured = false;
-	this.errorMsg = "";
 }
 
-Pipeline.prototype.go = function(callback) {
-	this.callback = callback;
-	this.next();
-};
+Pipeline.prototype = {
+	go: function(callback) {
+		this.callback = callback;
+		this.next();
+	},
 
-Pipeline.prototype.error = function(msg) {
-	this.errorOccured = true;
-	this.errorMsg = msg;
-	this.callback(true, this);
-};
+	next: function(err) {
+		var me = this;
+		var fns = me.fns;
 
-Pipeline.prototype.next = function() {
-	var me = this;
-	var fns = me.fns;
+		if (err) {
+			log.debug('err: ' + err);
+			this.clear();
+			this.doCallback(err);
+			return;
+		}
 
-	if (me.errorOccured) {
-		return;
+		var fn = fns.shift();
+		if (fn) {
+			setImmediate(function() {
+				fn(me);
+			}.bind(me));
+		} else {
+			this.doCallback();
+		}
+	},
+
+	doCallback: function(err) {
+		var me = this;
+		setTimeout(function() {
+			me.callback(err, me);
+		}.bind(me), 1);
+	},
+
+	clear: function() {
+		this.fns = [];
+	},
+
+	enqueue: function(fn) {
+		var me = this;
+
+		me.fns.push(function(me) {
+			var answer = fn(me);
+			if (answer !== false)
+				me.next();
+		});
 	}
-
-	var fn = fns.shift();
-	if (fn) {
-		setImmediate(function() {
-			fn(me);
-		}.bind(me));
-	} else {
-		setImmediate(function() {
-			me.callback(false, me);
-		}.bind(me));
-	}
-};
-
-Pipeline.prototype.clear = function() {
-	this.fns = [];
-};
-
-Pipeline.prototype.enqueue = function(fn) {
-	var me = this;
-
-	me.fns.push(function(me) {
-		var answer = fn(me);
-		if (answer !== false)
-			me.next(me);
-	});
 };
 
 module.exports = Pipeline;

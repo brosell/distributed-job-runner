@@ -51,9 +51,8 @@ Api.prototype = {
 				}
 				pipeline.next();
 			} catch (ex) {
-				response.writeHead(500);
-				response.write("bad data");
-				response.end();
+				log.debug('bad post data');
+				pipeline.next('bad post data');
 			}
 		});
 
@@ -68,11 +67,8 @@ Api.prototype = {
 		pipeline.data.response.end();
 	},
 
-	error: function(pipeline) {
-
-	},
-
 	processQueryString: function(pipeline) {
+		log.debug("api.processQueryString");
 		var request = pipeline.data.request;
 		var url = request.url;
 
@@ -105,7 +101,8 @@ Api.prototype = {
 			resource/(id)
 			parent/id/child/(id) - order/12/items, order/12/items/42
 		*/
-
+		log.debug("api.processQueryUrl");
+		
 		var request = pipeline.data.request;
 		var url = request.url;
 
@@ -132,7 +129,7 @@ Api.prototype = {
 	},
 
 	routeRequest: function(pipeline) {
-
+		log.debug("api.routeRequest");
 		var request = pipeline.data.request;
 		var result = pipeline.result;
 
@@ -169,7 +166,6 @@ Api.prototype = {
 		pipeline.result.status = 404;
 		pipeline.result.response = "Not Found";
 		
-
 		if (method == 'GET' && !pipeline.data.id && modelResource.onList) {
 			// list
 			restResult = modelResource.onList(request, result);
@@ -212,6 +208,7 @@ Api.prototype = {
 	},
 
 	onRequest: function(request, response) {
+		log.debug("api.onRequest");
 		var me = this;
 		var pipeline = new Pipeline();
 		pipeline.data = {
@@ -231,9 +228,15 @@ Api.prototype = {
 		pipeline.enqueue(this.routeRequest.bind(this));
 
 		pipeline.go(function(err, pipeline) {
+			if (err) {
+				log.debug("api.err: " + err);
+				pipeline.clear();
+				pipeline.result.status = 500;
+				pipeline.result.response = { error: err };
+			}
+
 			// pipeline.enqueue(this.prepareResponsee.bind(this));
 			pipeline.enqueue(me.writeResponse.bind(me));
-
 			pipeline.go(function(err, pipeline) {
 				log.debug("finished ");
 			});
