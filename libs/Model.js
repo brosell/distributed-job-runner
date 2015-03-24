@@ -5,7 +5,7 @@ function Model(cfg) {
 	// name and fields
 	this.resourceCfg = cfg;
 	this.modelName = cfg.name;
-	this.filename = "data_" + this.modelName + ".json";
+	this.filename = "data/" + this.modelName + ".json";
 
 	this.data = [];
 	this.load();
@@ -73,7 +73,10 @@ Model.prototype = {
 	},
 
 	queryItem: function(filter) {
-		return this.modelClone(this.queryItemInternal(filter));
+		var item = this.queryItemInternal(filter);
+		if (item){
+			return this.modelClone(item);
+		}
 	},
 
 	getItem: function(id) {
