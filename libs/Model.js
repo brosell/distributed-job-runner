@@ -26,10 +26,10 @@ Model.prototype = {
 		};
 		for (var i in this.resourceCfg.fields) {
 			var fieldName = this.resourceCfg.fields[i];
-			obj[fieldName] = '';
+			obj[fieldName] = sourceObj[fieldName]?sourceObj[fieldName]:'';
 		}
 
-		obj = this.updateFrom(sourceObj, obj);
+		// obj = this.updateFrom(sourceObj, obj);
 
 		if (obj.id == 'x') {
 			obj.id = this.guid();
@@ -47,32 +47,41 @@ Model.prototype = {
 		return this.clone(obj);
 	},
 
-	queryItems: function(filter) {
+	queryItemsInternal: function(filter) {
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
 			if (filter(this.data[i])) {
 				returnList[returnList.length] = this.data[i];
 			}
 		}
-		var me = this;
-		return returnList.map( function(item) { return me.modelClone(this); } );
+		return returnList;
 	},
 
-    queryItem: function(filter) {
+	queryItems: function(filter) {
+		var me = this;
+		return this.queryItemsInternal(filter)
+			.map(function(item) { return me.modelClone(item); } );
+	},
+
+    queryItemInternal: function(filter) {
 		var returnList = [];
 		for (var i = 0; i < this.data.length; i++) {
 			if (filter(this.data[i])) {
-				return this.modelClone(this.data[i]);
+				return this.data[i];
 			}
 		}
 	},
 
+	queryItem: function(filter) {
+		return this.modelClone(this.queryItemInternal(filter));
+	},
+
 	getItem: function(id) {
-		var r = this.queryItem(function(item){
+		var r = this.queryItemInternal(function(item){
 			return item.id == id;
 		});
 
-		return this.modelClone(r);
+		return r;
 	},
 
 	get: function(id) {
@@ -87,9 +96,11 @@ Model.prototype = {
 	},
 
 	update: function(id, data) {
-		log.debug('update');
+		
 		var toUpdate = this.getItem(id);
-		toUpdate = this.updateFrom(data, toUpdate);
+		log.debug('update: ' + toUpdate.id);
+		this.updateFrom(data, toUpdate);
+
 		this.save();
 		return this.clone(toUpdate);
 	},
@@ -110,6 +121,7 @@ Model.prototype = {
 	},
 
 	save: function() {
+		log.log('save: ' + this.filename);
 		var json = JSON.stringify(this.data, null, 2);
 		//log.debug('save: ' + json);
 		fs.writeFileSync(this.filename, json);
@@ -133,9 +145,11 @@ Model.prototype = {
 		for (var i in this.resourceCfg.fields) {
 			var fieldName = this.resourceCfg.fields[i];
 			if (from[fieldName]) {
-				ret[fieldName] = from[fieldName] || "";
+				log.debug('updating: ' + fieldName + ' ' + from[fieldName]);
+				ret[fieldName] = from[fieldName];
 			}
 		}
+		log.debug(JSON.stringify(to));
 		return ret;
 	},
 
