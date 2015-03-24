@@ -16,7 +16,7 @@ module.exports = {
 
 		// data on a specific session (current or past)
 		onGet: function(id) {
-			return this.model.getItem(id);
+			return this.model.get(id);
 		},
 	},
 
