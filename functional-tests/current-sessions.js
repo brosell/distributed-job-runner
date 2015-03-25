@@ -49,72 +49,75 @@ module.exports = {
 	},
 
 	'complete lifecycle': function(test) {
-		var pipeline = new Pipeline();
 		var id = '';
 		// test.expect(8);
 
-		pipeline.enqueue(function(pl) {
-			log.debug('create the session');
-			rest.createCurrentSession(function(data, resp) {
-				if (resp.statusCode >= 300) {
-					pl.next('failed to create');
-				}
-				id = data.id;
-				setTimeout(function() { pl.next(); }, 1000 );
-			});
-			return false;
-		});
+		var pipeline = new Pipeline();
+		
+		pipelineQueue = [
+			function(pl) {
+				log.debug('create the session');
+				rest.createCurrentSession(function(data, resp) {
+					if (resp.statusCode >= 300) {
+						pl.next('failed to create');
+					}
+					id = data.id;
+					setTimeout(function() { pl.next(); }, 1000 );
+				});
+				return false;
+			},
 
-		pipeline.enqueue(function(pl){
-			log.debug('do and test a deep get');
-			rest.getCurrentSession( { parameters: { deep: true } }, function(data, resp){
-				if (resp.statusCode >= 300) {
-					pl.next('failed to get');
-				}
+			function(pl){
+				log.debug('do and test a deep get');
+				rest.getCurrentSession( { parameters: { deep: true } }, function(data, resp){
+					if (resp.statusCode >= 300) {
+						pl.next('failed to get');
+					}
 
-				test.equal(data.id, id);
-				test.equal(data.result, 'pending');
-				test.equal(data.status, 'ready');
-				test.ok(data.jobs);
-				test.equal(5, data.jobs.length);
-				test.equal('jobs', data.jobs[0].model);
-				pl.next();
-			});
-			return false;
-		});
+					test.equal(data.id, id);
+					test.equal(data.result, 'pending');
+					test.equal(data.status, 'ready');
+					test.ok(data.jobs);
+					test.equal(5, data.jobs.length);
+					test.equal('jobs', data.jobs[0].model);
+					pl.next();
+				});
+				return false;
+			},
 
-		pipeline.enqueue(function(pl){
-			log.debug('do and test a shallow get');
-			rest.getCurrentSession(function(data, resp){
-				if (resp.statusCode >= 300) {
-					pl.next('failed to get');
-				}
+			function(pl){
+				log.debug('do and test a shallow get');
+				rest.getCurrentSession(function(data, resp){
+					if (resp.statusCode >= 300) {
+						pl.next('failed to get');
+					}
 
-				test.equal(data.id, id);
-				test.equal(data.result, 'pending');
-				test.equal(data.status, 'ready');
-				test.ok(!data.jobs);
+					test.equal(data.id, id);
+					test.equal(data.result, 'pending');
+					test.equal(data.status, 'ready');
+					test.ok(!data.jobs);
 
-				pl.next();
-			});
-			return false;
-		});
+					pl.next();
+				});
+				return false;
+			},
 
-		pipeline.enqueue(function(pl) {
-			rest.closeCurrentSession( {	parameters: { confirm: true } }, function(data) {
-				pl.next();
-			});
-			return false;
-		});
+			function(pl) {
+				rest.closeCurrentSession( {	parameters: { confirm: true } }, function(data) {
+					pl.next();
+				});
+				return false;
+			},
 
-		pipeline.enqueue(function(pl) {
-			log.debug('make sure deleted');
-			rest.getCurrentSession(function(data, response) {
-				test.equal(response.statusCode, 404);
-				pl.next();
-			});
-			return false;
-		});
+			function(pl) {
+				log.debug('make sure deleted');
+				rest.getCurrentSession(function(data, response) {
+					test.equal(response.statusCode, 404);
+					pl.next();
+				});
+				return false;
+			}
+		];
 
 		pipeline.go(function(err) {
 			log.debug('done: ' + err || 'ok');

@@ -1,7 +1,7 @@
 var log = require("./log.js");
 
-function Pipeline() {
-	this.fns = [];
+function Pipeline(fns) {
+	this.fns = fns || [ ];
 	this.callback = null;
 }
 
