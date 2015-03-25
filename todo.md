@@ -1,6 +1,10 @@
 Todo
 
 General
+- create some functional tests
+	X current-session
+	- sessions
+	- jobs
 - pacakge restapi/model/pipeliner
 X meta/reloadModel is broken
 
