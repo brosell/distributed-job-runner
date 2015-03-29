@@ -1,6 +1,5 @@
 var log = require("./libs/log.js");
 var Model = require("./libs/Model.js");
-var LINQ = require('node-linq').LINQ;
 
 module.exports = {
 	sessions: new Model({
@@ -13,7 +12,7 @@ module.exports = {
 		],
 		validators: {
 			'result': function(value) {
-				return new LINQ(['', 'pending', 'pass', 'fail']).Any(function(valid) { return valid === value; });
+				return ['', 'pending', 'pass', 'fail'].indexOf(value) != -1;
 			}
 		}
 	}),

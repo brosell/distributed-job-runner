@@ -1,12 +1,15 @@
 var shell = require('./libs/shell.js');
- // require('./index.js');
 //cmd /c del /q data\*
+
 
 shell.run('cmd', ['/c', 'del', '/q', 'data\\*'], {
 	done: function(stdout){
 		console.log('deleted');
 	}
 });
+
+require('./index.js');
+
  
 // shell.run('node', ['index.js'], {
 // 	done: function(stdout) {
