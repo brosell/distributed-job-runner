@@ -1,7 +1,7 @@
 var log = require("./libs/log.js");
 var SessionConfigurator = require("./sessionConfigurator.js");
 var models = require('./models.js');
-
+log.logDebug = true;
 
 // CI agent -> mediator
 module.exports = {
@@ -24,11 +24,30 @@ module.exports = {
 		name: 'current-session',
 		url: 'current-session',
 
+		allocateJob: function(currentSession) {
+			var nextJob = models.jobs.queryItem(function(job) {
+				return job.sessionId == currentSession.id &&
+					job.status == 'waiting';
+			});
+			
+			if (nextJob) {
+				nextJob.status = 'started';
+				nextJob.startTimestamp = new Date().toString();
+				models.jobs.update(nextJob.id, nextJob);
+			}
+
+			return nextJob;
+		},
+
 		// view the one and only current session
 		onList: function(request) {
 			var currentSession = this.model.queryItem(function(item) {
 				return !item.endTimestamp;
 			});
+
+			if (currentSession && request.queryString['allocateJob']) {
+				return this.allocateJob(currentSession);
+			}
 
 			if (currentSession && request.queryString['deep']) {
 				currentSession.jobs = models.jobs.queryItems(function(job) {
@@ -50,8 +69,6 @@ module.exports = {
 				result.response = { error: 'session already running', currentSession: currentSession };
 				return;
 			}
-
-			// TODO: kickoff the sessionConfigurator
 
 			result.status = 201;
 			currentSession = this.model.create({startTimestamp: new Date().toString()}, true);

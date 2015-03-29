@@ -15,7 +15,6 @@ var rest = client.methods;
 
 module.exports = {
 	'setUp': function(callback) {
-		// 'delete' the potential current session
 		rest.closeCurrentSession( {
 				parameters: { confirm: true }
 			},
@@ -48,11 +47,10 @@ module.exports = {
 		});
 	},
 
-	'complete lifecycle': function(test) {
+	'complete lifecycle (happy path)': function(test) {
 		var id = '';
 		// test.expect(8);
 
-		var pipeline = new Pipeline();
 		
 		pipelineQueue = [
 			function(pl) {
@@ -60,6 +58,7 @@ module.exports = {
 				rest.createCurrentSession(function(data, resp) {
 					if (resp.statusCode >= 300) {
 						pl.next('failed to create');
+						return;
 					}
 					id = data.id;
 					setTimeout(function() { pl.next(); }, 1000 );
@@ -72,6 +71,7 @@ module.exports = {
 				rest.getCurrentSession( { parameters: { deep: true } }, function(data, resp){
 					if (resp.statusCode >= 300) {
 						pl.next('failed to get');
+						return;
 					}
 
 					test.equal(data.id, id);
@@ -90,6 +90,7 @@ module.exports = {
 				rest.getCurrentSession(function(data, resp){
 					if (resp.statusCode >= 300) {
 						pl.next('failed to get');
+						return;
 					}
 
 					test.equal(data.id, id);
@@ -119,10 +120,21 @@ module.exports = {
 			}
 		];
 
+		var pipeline = new Pipeline(pipelineQueue);
+		
 		pipeline.go(function(err) {
 			log.debug('done: ' + err || 'ok');
 			test.done();
 		});
 	}
+
+	// 'ending session ends pending jobs': function(test) {
+		
+	// 		create session and wait for jobs.
+	// 		verify that jobs are not started or completed
+	// 		close the session
+	// 		verify that the jobs close (result: 'none', status: 'canceled')
+		
+	// }
 	
 };

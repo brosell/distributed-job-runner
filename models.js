@@ -20,7 +20,8 @@ module.exports = {
 			'what',
 			'startTimestamp',
 			'endTimestamp',
-			'status' // [waiting for applicant|running|pass|fail|timed out]
+			'status', // [waiting for applicant|running|pass|fail|timed out]
+			'result'
 		]
 	}),
 
@@ -32,6 +33,6 @@ module.exports = {
 			'artifact'
 		]
 	})
-
-	
 };
+
+

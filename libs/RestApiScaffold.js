@@ -61,7 +61,9 @@ Api.prototype = {
 
 	writeResponse: function(pipeline) {
 		// json response, status, response.end, etc
-		log.debug('writeResponse');
+		log.debug('writeResponse: ' + pipeline.result.status);
+		pipeline.data.response.setHeader('content-type', 'application/json');
+		
 		pipeline.data.response.writeHead(pipeline.result.status);
 		pipeline.data.response.write(JSON.stringify(pipeline.result.response, null, 2));
 		pipeline.data.response.end();
@@ -161,39 +163,45 @@ Api.prototype = {
 
 		var method = request.method;
 
+		log.log(method + ': ' + request.url);
 		var restResult;
 
 		pipeline.result.status = 404;
 		pipeline.result.response = "Not Found";
-		
-		if (method == 'GET' && !pipeline.data.id && modelResource.onList) {
-			// list
-			restResult = modelResource.onList(request, result);
-			if (restResult) {
-				pipeline.result.status = 200;
+		try {
+			if (method == 'GET' && !pipeline.data.id && modelResource.onList) {
+				// list
+				restResult = modelResource.onList(request, result);
+				if (restResult) {
+					pipeline.result.status = 200;
+				}
+			} else if (method == 'GET' && modelResource.onGet) {
+				// get
+				restResult = modelResource.onGet(pipeline.data.id, request, result);
+				if (restResult) {
+					pipeline.result.status = 200;
+				}
+			} else if (method == 'POST' && modelResource.onPost && !pipeline.data.id) {
+				// create
+				restResult = modelResource.onPost(pipeline.data.postData, request, result);
+				if (restResult) {
+					pipeline.result.status = 201;
+				}
+			} else if (method == 'PUT' && modelResource.onPut) {
+				restResult = modelResource.onPut(pipeline.data.id, pipeline.data.postData, request, result);
+				if (restResult) {
+					pipeline.result.status = 200;
+				}
+			} else if (method == 'DELETE' && modelResource.onDelete) {
+				restResult = modelResource.onDelete(pipeline.data.id, request, result);
+				if (restResult) {
+					pipeline.result.status = 200;
+				}
 			}
-		} else if (method == 'GET' && modelResource.onGet) {
-			// get
-			restResult = modelResource.onGet(pipeline.data.id, request, result);
-			if (restResult) {
-				pipeline.result.status = 200;
-			}
-		} else if (method == 'POST' && modelResource.onPost && !pipeline.data.id) {
-			// create
-			restResult = modelResource.onPost(pipeline.data.postData, request, result);
-			if (restResult) {
-				pipeline.result.status = 201;
-			}
-		} else if (method == 'PUT' && modelResource.onPut) {
-			restResult = modelResource.onPut(pipeline.data.id, pipeline.data.postData, request, result);
-			if (restResult) {
-				pipeline.result.status = 200;
-			}
-		} else if (method == 'DELETE' && modelResource.onDelete) {
-			restResult = modelResource.onDelete(pipeline.data.id, request, result);
-			if (restResult) {
-				pipeline.result.status = 200;
-			}
+		}
+		catch(e) {
+			pipeline.next(e.toString());
+			return;
 		}
 
 		if (restResult === false) {
@@ -275,7 +283,13 @@ Api.prototype = {
 			},
 
 			onPut: function(id, data) {
-				return this.model.update(id, data);
+				try {
+					log.debug('PUT: ' + JSON.stringify(data, null, 2));
+					return this.model.update(id, data);
+				}
+				catch(e) {
+					return null;
+				}
 			}
 		};
 

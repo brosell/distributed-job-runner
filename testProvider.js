@@ -18,7 +18,7 @@ TestProvider.prototype = {
 				"fifth"
 			];
 			pipeline.next();
-		}, 1000);
+		}, 1);
 
 		return false;
 	}

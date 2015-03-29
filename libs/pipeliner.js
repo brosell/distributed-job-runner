@@ -3,6 +3,7 @@ var log = require("./log.js");
 function Pipeline(fns) {
 	this.fns = fns || [ ];
 	this.callback = null;
+	this.data = {};
 }
 
 Pipeline.prototype = {

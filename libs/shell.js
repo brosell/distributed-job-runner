@@ -7,8 +7,8 @@ module.exports = {
 		var resp = "";
 		var errResp = "";
 
-		child.stdout.on('data', function (buffer) { 
-			resp += buffer.toString(); 
+		child.stdout.on('data', function (buffer) {
+			resp += buffer.toString();
 			if (callbacks.data) {
 				callbacks.data(buffer.toString());
 			}

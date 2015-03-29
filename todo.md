@@ -1,10 +1,16 @@
 Todo
 
+- getting sessions stuck open sometimes?
+
+Test Runner
+- attribute for defect numbers. Create a regression that exposes a known defect. Only run the test if the jira item is closed
+
+
 General
 - create some functional tests
 	X current-session
 	- sessions
-	- jobs
+	X jobs
 - pacakge restapi/model/pipeliner
 X meta/reloadModel is broken
 
@@ -16,7 +22,7 @@ X async foreach - got library
 
 RestAPI thingie
 X support parent/id/child/(id) resources
-- facets
+X facets - using query string parameters
 - log details about the request
 
 
