@@ -1,5 +1,6 @@
 var log = require("./libs/log.js");
 var Model = require("./libs/Model.js");
+var LINQ = require('node-linq').LINQ;
 
 module.exports = {
 	sessions: new Model({
@@ -7,9 +8,14 @@ module.exports = {
 		fields: [
 			'startTimestamp',
 			'endTimestamp',
-			'status', // status: initializing, generating list, bootstrapping, ready for applicants
-			'result', // overall result of the session [pending|pass|fail]
+			'status', // status: initializing, ready (for applicants), complete
+			'result', // pending, pass, fail      overall result of the session [pending|pass|fail]
 		],
+		validators: {
+			'result': function(value) {
+				return new LINQ(['', 'pending', 'pass', 'fail']).Any(function(valid) { return valid === value; });
+			}
+		}
 	}),
 
 	jobs: new Model({
@@ -20,8 +26,8 @@ module.exports = {
 			'what',
 			'startTimestamp',
 			'endTimestamp',
-			'status', // [waiting for applicant|running|pass|fail|timed out]
-			'result'
+			'status', // waiting, started, complete
+			'result' // pending, pass, fail
 		]
 	}),
 

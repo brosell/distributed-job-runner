@@ -37,7 +37,7 @@ module.exports = {
 
 	'can create one': function(test) {
 		rest.createCurrentSession(function(data) {
-			test.equal('', data.status);
+			test.equal('initializing', data.status);
 			test.equal('', data.result);
 			test.equal('sessions', data.model);
 			test.ok(data.id);

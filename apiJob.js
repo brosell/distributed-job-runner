@@ -1,6 +1,8 @@
 var log = require("./libs/log.js");
 var LINQ = require('node-linq').LINQ;
 var models = require('./models.js');
+var dateProvider = require('./timeStampProvider.js');
+
 
 module.exports = {
 	jobsApi: {
@@ -32,7 +34,7 @@ module.exports = {
 		onPut: function(id, data, request) {
 			if (request.queryString['complete']) {
 				data.status = 'complete';
-				data.endTimestamp = new Date().toString();
+				data.endTimestamp = dateProvider.nowToTimestamp();
 			
 				var job = this.model.update(id, data);
 				log.debug('+1');

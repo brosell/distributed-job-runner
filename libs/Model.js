@@ -36,6 +36,10 @@ Model.prototype = {
 			obj.model = this.modelName;
 		}
 
+		if (!this.validate(obj)) {
+			throw 'all fucked up';
+		}
+
 		if (pushToFront) {
 			this.data.unshift(obj);
 		}
@@ -99,9 +103,16 @@ Model.prototype = {
 	},
 
 	update: function(id, data) {
-		
 		var toUpdate = this.getItem(id);
+		var validationClone = this.modelClone(toUpdate);
+
 		log.debug('update: ' + toUpdate.id);
+		this.updateFrom(data, validationClone);
+
+		if (!this.validate(toUpdate)) {
+			throw 'all fucked up';
+		}
+
 		this.updateFrom(data, toUpdate);
 
 		this.save();
@@ -121,6 +132,18 @@ Model.prototype = {
 		} catch(e) {
 
 		}
+	},
+
+	validate: function(item) {
+		if (this.resourceCfg.validators) {
+			for(var fieldName in this.resourceCfg.validators) {
+				var vfn = this.resourceCfg.validators[fieldName];
+				if (!vfn(item[fieldName])) {
+					return false;
+				}
+			}
+		}
+		return true;
 	},
 
 	save: function() {

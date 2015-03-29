@@ -301,15 +301,7 @@ module.exports = {
 		});
 	},
 	
-	// 'can only get 5 jobs (since there are only five)': function(test) {
-	// 	test.done();
-	// },
-
 	// 'if no current session then no jobs': function(test) {
-
-	// },
-
-	// 'if no jobs left then no jobs': function(test) {
 
 	// },
 

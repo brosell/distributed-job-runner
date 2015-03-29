@@ -1,6 +1,8 @@
 var log = require("./libs/log.js");
 var SessionConfigurator = require("./sessionConfigurator.js");
 var models = require('./models.js');
+var dateProvider = require('./timeStampProvider.js');
+
 log.logDebug = true;
 
 // CI agent -> mediator
@@ -32,7 +34,7 @@ module.exports = {
 			
 			if (nextJob) {
 				nextJob.status = 'started';
-				nextJob.startTimestamp = new Date().toString();
+				nextJob.startTimestamp = dateProvider.nowToTimestamp();
 				models.jobs.update(nextJob.id, nextJob);
 			}
 
@@ -71,7 +73,10 @@ module.exports = {
 			}
 
 			result.status = 201;
-			currentSession = this.model.create({startTimestamp: new Date().toString()}, true);
+			currentSession = this.model.create( {
+				startTimestamp: dateProvider.nowToTimestamp(),
+				status: 'initializing'
+			}, true);
 
 			var sessionConfigurator = new SessionConfigurator(currentSession);
 			sessionConfigurator.configure();
@@ -92,7 +97,7 @@ module.exports = {
 				return !item.endTimestamp;
 			});
 			if (currentSession) {
-				currentSession.endTimestamp = new Date().toString();
+				currentSession.endTimestamp = dateProvider.nowToTimestamp();
 				return this.model.update(currentSession.id, currentSession);
 			}
 		},

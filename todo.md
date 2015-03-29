@@ -2,6 +2,11 @@ Todo
 
 - getting sessions stuck open sometimes?
 
+- Tests
+	- jobs
+		- if session !ready then 404
+		
+
 Test Runner
 - attribute for defect numbers. Create a regression that exposes a known defect. Only run the test if the jira item is closed
 
