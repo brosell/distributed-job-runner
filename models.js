@@ -11,8 +11,11 @@ module.exports = {
 			'result', // pending, pass, fail      overall result of the session [pending|pass|fail]
 		],
 		validators: {
-			'result': function(value) {
-				return ['', 'pending', 'pass', 'fail'].indexOf(value) != -1;
+			'result': function(value, current) {
+				return ['pending', 'pass', 'fail'].indexOf(value) != -1;
+			},
+			'status': function(value, current) {
+				return ['initializing', 'ready', 'complete'].indexOf(value) != -1;
 			}
 		}
 	}),
@@ -26,8 +29,17 @@ module.exports = {
 			'startTimestamp',
 			'endTimestamp',
 			'status', // waiting, started, complete
-			'result' // pending, pass, fail
-		]
+			'result' // pending, pass, fail, canceled
+		],
+
+		validators: {
+			'status': function(value, current) {
+				return ['waiting', 'started', 'complete'].indexOf(value) != -1;
+			},
+			'result': function(value, current) {
+				return ['pending', 'pass', 'fail', 'canceled'].indexOf(value) != -1;
+			}
+		}
 	}),
 
 	jobArtifacts: new Model({

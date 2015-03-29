@@ -75,7 +75,8 @@ module.exports = {
 			result.status = 201;
 			currentSession = this.model.create( {
 				startTimestamp: dateProvider.nowToTimestamp(),
-				status: 'initializing'
+				status: 'initializing',
+				result: 'pending'
 			}, true);
 
 			var sessionConfigurator = new SessionConfigurator(currentSession);

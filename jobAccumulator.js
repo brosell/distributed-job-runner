@@ -25,7 +25,8 @@ JobAccumulator.prototype = {
 					sessionId: sessionId,
 					who: 'Bert',
 					what: test,
-					status: 'waiting'
+					status: 'waiting',
+					result: 'pending'
 				};
 
 				models.jobs.create(job);

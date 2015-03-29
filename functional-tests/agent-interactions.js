@@ -115,7 +115,7 @@ module.exports = {
 		// ensure only one job has been started and completed
 		pipeline.enqueue(function(pl) {
 			job = pl.data.job;
-			job.result = "yay, we did it";
+			job.result = "fail";
 			rest.completeJob({path: { "id": job.id }, data: job }, function(data) {
 				jobsCountQuery(
 					function(j) { return j.id == job.id	&&
@@ -192,7 +192,7 @@ module.exports = {
 		// ensure that two are complete and one is pending
 		pipeline.enqueue(function(pl) {
 			var job = job2;
-			job.result = "yay, we did it, again";
+			job.result = "pass";
 			rest.completeJob({path: { "id": job.id }, data: job }, function(data) {
 				getJobStatusCounts(function(counts){
 					var expected = {completed: 2, pending: 1, waiting: 2};
@@ -252,7 +252,7 @@ module.exports = {
 			var testPipeline = new Pipeline([
 				function(p) {
 					var job = job3;
-					job.result = 'yay';
+					job.result = 'pass';
 					rest.completeJob({path: { "id": job.id }, data: job }, function(data) {
 						p.next();
 					});
@@ -260,7 +260,7 @@ module.exports = {
 				},
 				function(p) {
 					var job = job4;
-					job.result = 'yay';
+					job.result = 'pass';
 					rest.completeJob({path: { "id": job.id }, data: job }, function(data) {
 						p.next();
 					});
@@ -268,7 +268,7 @@ module.exports = {
 				},
 				function(p) {
 					var job = job5;
-					job.result = 'yay';
+					job.result = 'pass';
 					rest.completeJob({path: { "id": job.id }, data: job }, function(data) {
 						p.next();
 					});

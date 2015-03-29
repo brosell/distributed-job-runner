@@ -138,7 +138,7 @@ Model.prototype = {
 		if (this.resourceCfg.validators) {
 			for(var fieldName in this.resourceCfg.validators) {
 				var vfn = this.resourceCfg.validators[fieldName];
-				if (!vfn(item[fieldName])) {
+				if (!vfn(item[fieldName], item)) {
 					return false;
 				}
 			}

@@ -38,7 +38,7 @@ module.exports = {
 	'can create one': function(test) {
 		rest.createCurrentSession(function(data) {
 			test.equal('initializing', data.status);
-			test.equal('', data.result);
+			test.equal('pending', data.result);
 			test.equal('sessions', data.model);
 			test.ok(data.id);
 			test.equal('', data.endTimestamp);
@@ -49,8 +49,6 @@ module.exports = {
 
 	'complete lifecycle (happy path)': function(test) {
 		var id = '';
-		// test.expect(8);
-
 		
 		pipelineQueue = [
 			function(pl) {
@@ -121,6 +119,8 @@ module.exports = {
 		];
 
 		var pipeline = new Pipeline(pipelineQueue);
+
+		test.expect(11);
 		
 		pipeline.go(function(err) {
 			log.debug('done: ' + err || 'ok');
