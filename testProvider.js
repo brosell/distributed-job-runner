@@ -2,23 +2,22 @@
 one job: provide a list of tests from the test assemblies
 */
 
+var shell = require('./libs/shell.js');
+
 function TestProvider() {
 
 }
 
 TestProvider.prototype = {
 	provide: function(pipeline) {
-		setTimeout(
-			function() {
-				pipeline.data.tests = [
-				"first",
-				"second",
-				"third",
-				"forth",
-				"fifth"
-			];
-			pipeline.next();
-		}, 1);
+		shell.run('getTests.bat', null, {
+			done: function(stdout) {
+				pipeline.data.tests = stdout.split('\n')
+										.map(function(s) { return s.trim(); })
+										.filter(function(s) { return s; }); // not blank
+				pipeline.next();
+			}
+		});
 
 		return false;
 	}
