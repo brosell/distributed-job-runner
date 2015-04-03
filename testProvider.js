@@ -12,9 +12,10 @@ TestProvider.prototype = {
 	provide: function(pipeline) {
 		shell.run('getTests.bat', null, {
 			done: function(stdout) {
-				pipeline.data.tests = stdout.split('\n')
-										.map(function(s) { return s.trim(); })
-										.filter(function(s) { return s; }); // not blank
+				console.log(stdout);
+				var tests = JSON.parse(stdout);
+				pipeline.data.tests = tests
+										.map(function(test) { return test.suite; });
 				pipeline.next();
 			}
 		});
