@@ -1,3 +1,3 @@
-# restapi
+# Jobs and Agents
 
-a work in progress simple node.js RestApi and Model builder.
+A distributed regression runner and a work in progress simple node.js RestApi and Model builder.

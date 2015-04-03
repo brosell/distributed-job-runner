@@ -8,7 +8,7 @@ module.exports = {
 			'startTimestamp',
 			'endTimestamp',
 			'status', // status: initializing, ready (for applicants), complete
-			'result', // pending, pass, fail      overall result of the session [pending|pass|fail]
+			'result', // pending, pass, fail overall result of the session [pending|pass|fail]
 		],
 		validators: {
 			'result': function(value, current) {
@@ -25,7 +25,8 @@ module.exports = {
 		fields: [
 			'sessionId',
 			'who',
-			'what',
+			'testSuite',
+			'adminUser',
 			'startTimestamp',
 			'endTimestamp',
 			'status', // waiting, started, complete
