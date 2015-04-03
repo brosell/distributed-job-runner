@@ -24,7 +24,8 @@ JobAccumulator.prototype = {
 				var job = {
 					sessionId: sessionId,
 					who: 'Bert',
-					what: test,
+					testSuite: test,
+					adminUser: 'admiin',
 					status: 'waiting',
 					result: 'pending'
 				};
