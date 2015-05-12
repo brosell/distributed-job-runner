@@ -16,7 +16,7 @@ Stories
 	- perhaps through CI or on demand. or both.
 
 - as a stake holder I want to know the pass/fail status of the current or most recent session and its jobs.
-
+- as a stake holder I want to examine the artifacts of testing
 - as a sttke holder I want to be able to cancel a currently running test session.
 
 - as the job master I want to be able to get the latest version of the test dlls from somewhere
