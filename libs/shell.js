@@ -1,8 +1,9 @@
 var log = require("./log.js");
+var spawn = require('child_process').spawn;
 
 module.exports = {
 	run: function(cmd, args, callbacks ) {
-		var spawn = require('child_process').spawn;
+		
 		var child = spawn(cmd, args);
 		var resp = "";
 		var errResp = "";
@@ -21,5 +22,13 @@ module.exports = {
 				callbacks.done(resp);
 			}
 		});
+
+		child.on('close', function(code){
+			if (callbacks.close) {
+				callbacks.close(code);
+			}
+		});
 	}
+
+
 };
